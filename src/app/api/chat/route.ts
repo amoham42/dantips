@@ -15,7 +15,7 @@ interface ExtendedUIMessage extends UIMessage {
   content?: MessageContent | MessageContent[];
 }
 
-type FrontendTools = unknown;
+type FrontendTools = ReturnType<typeof frontendTools>;
 
 export const maxDuration = 30;
 
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     messages,
     system,
     tools,
-  }: {
+  } : {
     messages: ExtendedUIMessage[];
     system?: string;
     tools?: FrontendTools;
@@ -134,5 +134,3 @@ Available tools: searchThreadRAG, searchGlobalRAG, searchMedicalLiterature`;
 
   return result.toUIMessageStreamResponse();
 }
-
-

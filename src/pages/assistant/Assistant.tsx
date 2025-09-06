@@ -1,14 +1,16 @@
 "use client";
 
-import { AssistantRuntimeProvider, CompositeAttachmentAdapter, SimpleImageAttachmentAdapter, SimpleTextAttachmentAdapter, ThreadListPrimitive } from "@assistant-ui/react";
+import {
+  AssistantRuntimeProvider,
+  CompositeAttachmentAdapter,
+  SimpleImageAttachmentAdapter,
+  SimpleTextAttachmentAdapter,
+  ThreadListPrimitive,
+} from "@assistant-ui/react";
 import { AssistantChatTransport, useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/components/assistant-ui/thread";
 import { makeShortTitle, setStoredTitle } from "@/lib/thread-titles";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -18,7 +20,6 @@ import { useState } from "react";
 import { VisionImageAdapter } from "@/components/assistant-ui/custom_attachments/VisionImageAdapter";
 import { PDFAttachmentAdapter } from "@/components/assistant-ui/custom_attachments/PDFAttachmentAdapter";
 
-
 const attachmentsAdapter = new CompositeAttachmentAdapter([
   new VisionImageAdapter(),
   new SimpleImageAttachmentAdapter(),
@@ -26,7 +27,6 @@ const attachmentsAdapter = new CompositeAttachmentAdapter([
   new PDFAttachmentAdapter(),
 ]);
 
-// Define types for message parts
 interface MessageTextPart {
   type: "text";
   text: string;
@@ -37,15 +37,14 @@ interface Message {
   [key: string]: unknown;
 }
 
-export function Assistant() {
-  const [searchOpen, setSearchOpen] = useState(false);
-  
-  // Use a simpler approach without circular reference
+export default function Assistant() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   let runtimeInstance: ReturnType<typeof useChatRuntime> | null = null;
-  
+
   const runtime = useChatRuntime({
     transport: new AssistantChatTransport({
-      api: "/api/chat",
+      api: "api/chat",
       headers: (): Record<string, string> => {
         try {
           const threadId: string | undefined = runtimeInstance?.threads?.mainItem?.getState()?.id;
@@ -58,7 +57,6 @@ export function Assistant() {
     adapters: {
       attachments: attachmentsAdapter,
     },
-   
     onFinish: ({ message, isAbort, isDisconnect, isError }) => {
       if (isAbort || isDisconnect || isError) return;
 
@@ -74,14 +72,14 @@ export function Assistant() {
       const title = makeShortTitle(fullText, 48);
 
       const threadItem = runtime.threads.mainItem;
-      threadItem.initialize()
+      threadItem
+        .initialize()
         .then(() => threadItem.rename(title))
         .catch(() => {})
         .finally(async () => {
           const threadId = threadItem.getState().id;
           if (threadId) setStoredTitle(threadId, title);
-          
-          // Index assistant reply into RAG (per-thread and contributes to global)
+
           if (threadId && fullText) {
             try {
               await fetch("/api/rag", {
@@ -97,8 +95,7 @@ export function Assistant() {
         });
     },
   });
-  
-  // Set the runtime instance for header access
+
   runtimeInstance = runtime;
 
   return (
@@ -109,30 +106,24 @@ export function Assistant() {
           <SidebarInset>
             <header className="flex h-12 shrink-0 items-center gap-2 border-b px-2">
               <SidebarTrigger />
-              <Separator orientation="vertical" className="h-4" />  
-              <Button 
-                className="size-7" 
-                variant="ghost" 
-                size="icon"
-                onClick={() => setSearchOpen(true)}
-              >
-                <SearchIcon className="size-4" />                
+              <Separator orientation="vertical" className="h-4" />
+              <Button className="size-7" variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+                <SearchIcon className="size-4" />
               </Button>
-              <Separator orientation="vertical" className="h-4" />        
+              <Separator orientation="vertical" className="h-4" />
               <ThreadListPrimitive.New asChild>
                 <Button className="size-7" variant="ghost" size="icon">
-                  <PlusIcon className="size-4" />                
+                  <PlusIcon className="size-4" />
                 </Button>
               </ThreadListPrimitive.New>
-              <Separator orientation="vertical" className="h-4" />     
-
+              <Separator orientation="vertical" className="h-4" />
             </header>
             <div className="flex-1 overflow-hidden">
               <Thread />
             </div>
           </SidebarInset>
         </div>
-        <Searchbar open={searchOpen} onOpenChange={setSearchOpen} />
+        <Searchbar open={isSearchOpen} onOpenChange={setIsSearchOpen} />
       </SidebarProvider>
     </AssistantRuntimeProvider>
   );

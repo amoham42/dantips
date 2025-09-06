@@ -24,7 +24,7 @@ export default function Home() {
             <div className="mt-8 justify-end">
   
                 <Button className="bg-white text-black hover:bg-white/90" asChild>
-                    <Link href="/app">Open the App</Link>
+                    <Link href="/assistant">Open the App</Link>
                 </Button>
             </div>
         </section>
