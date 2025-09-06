@@ -134,3 +134,5 @@ Available tools: searchThreadRAG, searchGlobalRAG, searchMedicalLiterature`;
 
   return result.toUIMessageStreamResponse();
 }
+
+

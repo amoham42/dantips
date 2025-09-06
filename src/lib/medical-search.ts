@@ -1,4 +1,4 @@
-import type { JSONSchema7 } from "json-schema";
+// Removed dependency on external JSONSchema types to simplify typing
 
 const EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils";
 const TOOL_NAME = "MyMedicalChatbot";
@@ -153,7 +153,7 @@ export async function executeMedicalSearch(params: MedicalSearchParams) {
   };
 }
 
-export const medicalSearchJSONSchema: JSONSchema7 = {
+export const medicalSearchJSONSchema = {
   type: "object",
   properties: {
     query: {
@@ -167,4 +167,4 @@ export const medicalSearchJSONSchema: JSONSchema7 = {
   },
   required: ["query"],
   additionalProperties: false,
-};
+} as const;
